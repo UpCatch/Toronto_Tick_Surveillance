@@ -1,4 +1,4 @@
-# Starter folder
+# Toronto Blacklegged Tick Surveillance Program
 
 ## Overview
 
