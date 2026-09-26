@@ -1,89 +1,76 @@
 #### Preamble ####
-# Purpose: Tests the structure and validity of the simulated Australian 
-  #electoral divisions dataset.
-# Author: Rohan Alexander
-# Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
+# Purpose: Tests the simulated Toronto blacklegged tick (BLT) surveillance data 
+# Author: Shrey Sati
+# Date: 26 September 2026
+# Contact: shrey.sati@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: 
   # - The `tidyverse` package must be installed and loaded
   # - 00-simulate_data.R must have been run
-# Any other information needed? Make sure you are in the `starter_folder` rproj
+# Any other information needed? N/A
 
 
 #### Workspace setup ####
 library(tidyverse)
 
-analysis_data <- read_csv("data/00-simulated_data/simulated_data.csv")
+simulated_data <- read_csv("data/01-raw_data/simulated_data.csv")
 
 # Test if the data was successfully loaded
-if (exists("analysis_data")) {
+if (exists("simulated_data")) {
   message("Test Passed: The dataset was successfully loaded.")
 } else {
   stop("Test Failed: The dataset could not be loaded.")
 }
 
-
 #### Test data ####
 
-# Check if the dataset has 151 rows
-if (nrow(analysis_data) == 151) {
-  message("Test Passed: The dataset has 151 rows.")
+# Check if dataset has 233 rows
+if (nrow(simulated_data) == 233) {
+  message("Test Passed: The dataset has 233 rows.")
 } else {
-  stop("Test Failed: The dataset does not have 151 rows.")
+  stop("Test Failed: The dataset does not have 233 rows.")
 }
 
-# Check if the dataset has 3 columns
-if (ncol(analysis_data) == 3) {
-  message("Test Passed: The dataset has 3 columns.")
+# Check if dataset has 9 columns
+if (ncol(simulated_data) == 9) {
+  message("Test Passed: The dataset has 9 columns.")
 } else {
-  stop("Test Failed: The dataset does not have 3 columns.")
+  stop("Test Failed: The dataset does not have 9 columns.")
 }
 
-# Check if all values in the 'division' column are unique
-if (n_distinct(analysis_data$division) == nrow(analysis_data)) {
-  message("Test Passed: All values in 'division' are unique.")
+# Check if every id is unique and in increasing order
+if (all(simulated_data$id == 1:233)) {
+  message("Test Passed: 'id' is unique and in increasing order.")
 } else {
-  stop("Test Failed: The 'division' column contains duplicate values.")
+  stop("Test Failed: 'id' is not in increasing order.")
 }
 
-# Check if the 'state' column contains only valid Australian state names
-valid_states <- c("New South Wales", "Victoria", "Queensland", "South Australia", 
-                  "Western Australia", "Tasmania", "Northern Territory", 
-                  "Australian Capital Territory")
+# Check if years are valid
+are_years_valid <- c(2013:2019, 2023)
 
-if (all(analysis_data$state %in% valid_states)) {
-  message("Test Passed: The 'state' column contains only valid Australian state names.")
+if (all(simulated_data$year %in% are_years_valid)) {
+  message("Test Passed: The 'year' column only contained valid years.")
 } else {
-  stop("Test Failed: The 'state' column contains invalid state names.")
+  stop("Test Failed: The 'year' column does not contain valid years.")
 }
 
-# Check if the 'party' column contains only valid party names
-valid_parties <- c("Labor", "Liberal", "Greens", "National", "Other")
-
-if (all(analysis_data$party %in% valid_parties)) {
-  message("Test Passed: The 'party' column contains only valid party names.")
+# Check if 'park_locations' contains no missing/blank values
+if (all(!is.na(simulated_data$park_locations)) && all(simulated_data$park_locations != "")) {
+  message("Test Passed: 'park_locations' contains no missing/blank values.")
 } else {
-  stop("Test Failed: The 'party' column contains invalid party names.")
+  stop("Test Failed: 'park_locations' contains missing/blank values.")
 }
 
-# Check if there are any missing values in the dataset
-if (all(!is.na(analysis_data))) {
-  message("Test Passed: The dataset contains no missing values.")
+# Check if 'total_blts' always equals 'blt_adults_and_nymphs'
+if (all(simulated_data$total_blts == simulated_data$blt_adults_and_nymphs)) {
+  message("Test Passed: 'total_blts' always equals 'blt_adults_and_nymphs'.")
 } else {
-  stop("Test Failed: The dataset contains missing values.")
+  stop("Test Failed: 'total_blts' does not always equals 'blt_adults_and_nymphs'.")
 }
 
-# Check if there are no empty strings in 'division', 'state', and 'party' columns
-if (all(analysis_data$division != "" & analysis_data$state != "" & analysis_data$party != "")) {
-  message("Test Passed: There are no empty strings in 'division', 'state', or 'party'.")
+# Check if 'num_positive' is never greater than 'blt_adults_and_nymphs'
+if (all(simulated_data$num_positive <= simulated_data$blt_adults_and_nymphs)) {
+  message("Test Passed: 'num_positive' is never greater than 'blt_adults_and_nymphs'.")
 } else {
-  stop("Test Failed: There are empty strings in one or more columns.")
-}
-
-# Check if the 'party' column has at least two unique values
-if (n_distinct(analysis_data$party) >= 2) {
-  message("Test Passed: The 'party' column contains at least two unique values.")
-} else {
-  stop("Test Failed: The 'party' column contains less than two unique values.")
+  stop("Test Failed: 'num_positive' is greater than 'blt_adults_and_nymphs' in at least one row.")
 }

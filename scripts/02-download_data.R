@@ -1,26 +1,32 @@
 #### Preamble ####
-# Purpose: Downloads and saves the data from [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Downloads and saves the Blacklegged Tick surveillance data 
+# from Open Data Toronto
+# Author: Shrey Sati
+# Date: 26 September 2026
+# Contact: shrey.sati@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: 
+  # - The `opendatatoronto` package must be installed and loaded
+# Any other information needed? N/A
 
 
 #### Workspace setup ####
 library(opendatatoronto)
-library(tidyverse)
-# [...UPDATE THIS...]
+library(dplyr)
 
-#### Download data ####
-# [...ADD CODE HERE TO DOWNLOAD...]
+# Downloading the data
+library(opendatatoronto)
+library(dplyr)
 
+# Get all resources for this package
+resources <- list_package_resources("78c88292-5375-4373-a687-788a5ff19077")
 
+# Identify datastore resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+raw_data <- filter(datastore_resources, row_number() == 1) %>% get_resource()
+raw_data
 
 #### Save data ####
-# [...UPDATE THIS...]
-# change the_raw_data to whatever name you assigned when you downloaded it.
-write_csv(the_raw_data, "inputs/data/raw_data.csv") 
-
+write_csv(raw_data, file = "data/01-raw_data/raw_data.csv")
          
