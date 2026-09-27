@@ -1,44 +1,59 @@
 #### Preamble ####
-# Purpose: Cleans the raw plane data recorded by two observers..... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 6 April 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Cleans the raw Blacklegged Tick surveillance data from OpenDataToronto
+# Author: Shrey Sati
+# Date: 26 September 2026
+# Contact: shrey.sati@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites:
+  # - 02-download_data.R has been run
+  # - data/raw_data/raw_data.csv exists
+# Any other information needed? N/A
 
 #### Workspace setup ####
 library(tidyverse)
 
 #### Clean data ####
-raw_data <- read_csv("inputs/data/plane_data.csv")
+raw_data <- read_csv("data/01-raw_data/raw_data.csv")
+
+# The 'geometry' column contains strings that look like
+# {"coordinates": [[-79.360567, 43.62612]], "type": "MultiPoint"}
+# Use regex to extract the latitude and longitude values from the string
+pattern <- '\\[\\s*(-?\\d+\\.\\d+)\\s*,\\s*(-?\\d+\\.\\d+)\\s*\\]'
+coordinates <- str_match(
+  raw_data$geometry, pattern
+)
 
 cleaned_data <-
   raw_data |>
-  janitor::clean_names() |>
-  select(wing_width_mm, wing_length_mm, flying_time_sec_first_timer) |>
-  filter(wing_width_mm != "caw") |>
+  # Turn the latitudes and longitudes from str_match() into numbers
   mutate(
-    flying_time_sec_first_timer = if_else(flying_time_sec_first_timer == "1,35",
-                                   "1.35",
-                                   flying_time_sec_first_timer)
+    longitude = as.numeric(coordinates[, 2]),
+    latitude = as.numeric(coordinates[, 3])
   ) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "490",
-                                 "49",
-                                 wing_width_mm)) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "6",
-                                 "60",
-                                 wing_width_mm)) |>
+  # Rename the columns so that they are more human-readable
+  rename (
+    id = `_id`,
+    park_locations = `Park Location`,
+    total_blts = `Total BLTs`,
+    blt_larvae = `BLT Larvae`,
+    blt_adults_and_nymphs = `BLT Adults and Nymphs`,
+    num_positive = `# Positive`,
+    year = Year
+  ) |>
+  # Keep only necessary columns. 
+  # 'geometry' column can be dropped since latitude and longitude have been extracted
+  select(
+    id, park_locations, year, blt_larvae, blt_adults_and_nymphs, total_blts,
+    num_positive, latitude, longitude
+  ) |>
+  # Ensure cell values are whole numbers
   mutate(
-    wing_width_mm = as.numeric(wing_width_mm),
-    wing_length_mm = as.numeric(wing_length_mm),
-    flying_time_sec_first_timer = as.numeric(flying_time_sec_first_timer)
-  ) |>
-  rename(flying_time = flying_time_sec_first_timer,
-         width = wing_width_mm,
-         length = wing_length_mm
-         ) |> 
-  tidyr::drop_na()
+    year = as.integer(year),
+    blt_larvae = as.integer(blt_larvae),
+    blt_adults_and_nymphs = as.integer(blt_adults_and_nymphs),
+    total_blts = as.integer(total_blts),
+    num_positive = as.integer(num_positive)
+  )
 
 #### Save data ####
-write_csv(cleaned_data, "outputs/data/analysis_data.csv")
+write_csv(cleaned_data, "data/02-analysis_data/analysis_data.csv")
