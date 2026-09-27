@@ -4,7 +4,7 @@
 # Date: 26 September 2026
 # Contact: shrey.sati@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: -----TODO----
+# Pre-requisites: None
 # Any other information needed? N/A
 
 
